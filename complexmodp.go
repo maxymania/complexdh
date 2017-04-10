@@ -83,9 +83,12 @@ func (m *ModulusGroup) Exponent(dr,di, sr,si *big.Int, scalar []byte) {
 	dr.SetUint64(1)
 	di.SetUint64(0)
 	for _,k := range scalar {
-		ips_multiply(dr,di,m.Modulus)
-		if (k&0x80)==0x80 {
-			multiply(dr,di,dr,di,sr,si,m.Modulus)
+		for bit := 0; bit < 8; bit++ {
+			ips_multiply(dr,di,m.Modulus)
+			if (k&0x80)==0x80 {
+				multiply(dr,di,dr,di,sr,si,m.Modulus)
+			}
+			k <<= 1
 		}
 	}
 }

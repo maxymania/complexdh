@@ -27,6 +27,21 @@ package complexdh
 import "math/big"
 import "crypto/elliptic"
 
+func sqrt(n uint) uint {
+	if n<0 { return -sqrt(-n) }
+	if n<2 { return n }
+	sc := sqrt(n>>2)<<1
+	lc := sc+1
+	if (lc*lc)>n { return sc }
+	return lc
+}
+func dropBits(bl uint) uint {
+	//sq := sqrt(bl)*45
+	sq := sqrt(sqrt(bl)*45)*10
+	//sq := uint(2025)
+	if sq>=bl { return 0 }
+	return bl-sq
+}
 
 type asCurve struct{
 	*ModulusGroup
@@ -35,11 +50,11 @@ type asCurve struct{
 func (a *asCurve) Params() *elliptic.CurveParams {
 	n := new(elliptic.CurveParams)
 	n.P = a.Modulus
-	n.N = n.P
+	n.N = new(big.Int).Rsh(n.P,dropBits(uint(n.P.BitLen())))
 	n.B = new(big.Int)
 	n.Gx = a.Gr
 	n.Gy = a.Gi
-	n.BitSize = n.P.BitLen()
+	n.BitSize = n.N.BitLen()
 	n.Name = "N/A(complex)"
 	return  n
 }
